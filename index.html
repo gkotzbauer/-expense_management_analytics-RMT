@@ -1433,23 +1433,29 @@
                     }
                 }
 
-                // Highest variance (exclude Net Ordinary Expense and Gross Profit)
+                // Highest variance (exclude Net Operating Income, Net Ordinary Income, Gross Profit, and Net Ordinary Expense)
                 const topVariance = this.filteredData
                     .filter(item => {
                         const variance = item['Anchor vs Prior Avg ($)'];
                         const cat = (item.Category || '').toLowerCase().trim();
                         return variance !== undefined && variance !== null && variance !== 0 &&
-                            cat !== 'net ordinary income' && cat !== 'gross profit' && cat !== 'net ordinary expense';
+                            cat !== 'net operating income' && cat !== 'net ordinary income' && cat !== 'gross profit' && cat !== 'net ordinary expense';
                     })
-                    .sort((a, b) => Math.abs(b['Anchor vs Prior Avg ($)']) - Math.abs(a['Anchor vs Prior Avg ($)']))[0];
+                    .sort((a, b) => Math.abs(b['Anchor vs Prior Avg ($)']) - Math.abs(a['Anchor vs Prior Avg ($)']));
+                
+                // If Net Operating Income is the first result, pick the second highest variance
+                let selectedVariance = topVariance[0];
+                if (selectedVariance && (selectedVariance.Category || '').toLowerCase().trim() === 'net operating income' && topVariance.length > 1) {
+                    selectedVariance = topVariance[1];
+                }
                 
                 const topVarianceElement = document.getElementById('topVarianceText');
                 if (topVarianceElement) {
-                    if (topVariance) {
-                        const varianceAmount = Math.round(topVariance['Anchor vs Prior Avg ($)']);
+                    if (selectedVariance) {
+                        const varianceAmount = Math.round(selectedVariance['Anchor vs Prior Avg ($)']);
                         const sign = varianceAmount >= 0 ? '+' : '-';
                         const formattedVariance = `(${sign}${Math.abs(varianceAmount).toLocaleString()})`;
-                        topVarianceElement.textContent = `${topVariance.Category} ${formattedVariance}`;
+                        topVarianceElement.textContent = `${selectedVariance.Category} ${formattedVariance}`;
                     } else {
                         topVarianceElement.textContent = 'No variance data available';
                     }
