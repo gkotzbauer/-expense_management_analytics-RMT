@@ -1438,15 +1438,32 @@
                     .filter(item => {
                         const variance = item['Anchor vs Prior Avg ($)'];
                         const cat = (item.Category || '').toLowerCase().trim();
+                        
+                        // Debug: Log categories that might be Net Operating Income
+                        if (cat.includes('operating') || cat.includes('income')) {
+                            console.log('Potential income category found:', item.Category, 'normalized as:', cat);
+                        }
+                        
                         return variance !== undefined && variance !== null && variance !== 0 &&
-                            cat !== 'net operating income' && cat !== 'net ordinary income' && cat !== 'gross profit' && cat !== 'net ordinary expense';
+                            cat !== 'net operating income' && cat !== 'net ordinary income' && cat !== 'gross profit' && cat !== 'net ordinary expense' &&
+                            !cat.includes('net operating income') && !cat.includes('operating income');
                     })
                     .sort((a, b) => Math.abs(b['Anchor vs Prior Avg ($)']) - Math.abs(a['Anchor vs Prior Avg ($)']));
                 
+                // Debug: Log the top 3 results
+                console.log('Top 3 variance results:', topVariance.slice(0, 3).map(item => ({
+                    category: item.Category,
+                    variance: item['Anchor vs Prior Avg ($)']
+                })));
+                
                 // If Net Operating Income is the first result, pick the second highest variance
                 let selectedVariance = topVariance[0];
-                if (selectedVariance && (selectedVariance.Category || '').toLowerCase().trim() === 'net operating income' && topVariance.length > 1) {
-                    selectedVariance = topVariance[1];
+                if (selectedVariance) {
+                    const selectedCat = (selectedVariance.Category || '').toLowerCase().trim();
+                    if ((selectedCat === 'net operating income' || selectedCat.includes('operating income')) && topVariance.length > 1) {
+                        console.log('Net Operating Income detected as first result, selecting second highest variance');
+                        selectedVariance = topVariance[1];
+                    }
                 }
                 
                 const topVarianceElement = document.getElementById('topVarianceText');
