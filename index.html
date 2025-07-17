@@ -1509,7 +1509,11 @@
                     const efficiency = item['Marketing Spend Efficiency'];
                     const hasEfficiencyData = efficiency && efficiency.toString().trim() !== '';
                     const cat = (item.Category || '').toLowerCase().trim();
-                    const isMarketingSpecial = cat === 'total marketing & advertising' || cat === 'advertising & marketing fund';
+                    const isMarketingSpecial =
+                        cat === 'total marketing & advertising' ||
+                        cat === 'advertising & marketing fund' ||
+                        cat === 'total 614000 marketing & advertising' ||
+                        cat === '614000 marketing & advertising';
                     // Include if it has efficiency data AND either:
                     // 1. It's not excluded (regular expense categories), OR
                     // 2. It's specifically a marketing total category
@@ -1517,7 +1521,7 @@
                     return hasEfficiencyData && (isNotExcluded || isMarketingSpecial);
                 });
                 // Ensure both special marketing categories are always included if present
-                ['total marketing & advertising', 'advertising & marketing fund'].forEach(specialCat => {
+                ['total marketing & advertising', 'advertising & marketing fund', 'total 614000 marketing & advertising', '614000 marketing & advertising'].forEach(specialCat => {
                     const found = this.originalData.find(item => (item.Category || '').toLowerCase().trim() === specialCat);
                     if (found && found['Marketing Spend Efficiency'] && !marketingEfficiencyCategories.some(item => (item.Category || '').toLowerCase().trim() === specialCat)) {
                         marketingEfficiencyCategories.push(found);
