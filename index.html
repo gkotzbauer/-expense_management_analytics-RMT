@@ -1391,9 +1391,9 @@
                     // Category
                     tableHTML += `<td>${item.Category || 'N/A'}</td>`;
                     
-                    // Expenses for Most Recent Month (now from 'May')
-                    const mayExpenses = item['May'] || 0;
-                    tableHTML += `<td class="center-column">${Math.round(mayExpenses).toLocaleString()}</td>`;
+                    // Expenses for Most Recent Month (now from 'Jun 2025' or 'June 2025')
+                    const juneExpenses = item['Jun 2025'] !== undefined ? item['Jun 2025'] : (item['June 2025'] !== undefined ? item['June 2025'] : 0);
+                    tableHTML += `<td class="center-column">${Math.round(juneExpenses).toLocaleString()}</td>`;
                     
                     // Most Recent Month vs. Avg. of Prior Months
                     const anchorPriorValue = item['Anchor vs Prior Avg ($)'] || 0;
