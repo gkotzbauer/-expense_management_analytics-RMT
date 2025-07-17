@@ -1505,25 +1505,32 @@
                 }
 
                 // Marketing Spend Efficiency - always include Total Marketing & Advertising and Advertising & Marketing Fund
+                const validMarketingEfficiency = [
+                    'unclassified',
+                    'under-leveraged',
+                    'efficient',
+                    'inefficient'
+                ];
                 const marketingEfficiencyCategories = this.filteredData.filter(item => {
-                    const efficiency = item['Marketing Spend Efficiency'];
-                    const hasEfficiencyData = efficiency && efficiency.toString().trim() !== '';
+                    const efficiency = (item['Marketing Spend Efficiency'] || '').toLowerCase().trim();
+                    const hasValidEfficiency = validMarketingEfficiency.includes(efficiency);
                     const cat = (item.Category || '').toLowerCase().trim();
                     const isMarketingSpecial =
                         cat === 'total marketing & advertising' ||
                         cat === 'advertising & marketing fund' ||
                         cat === 'total 614000 marketing & advertising' ||
                         cat === '614000 marketing & advertising';
-                    // Include if it has efficiency data AND either:
+                    // Include if it has a valid efficiency value AND either:
                     // 1. It's not excluded (regular expense categories), OR
                     // 2. It's specifically a marketing total category
                     const isNotExcluded = !this.isExcludedFromProjections(item.Category);
-                    return hasEfficiencyData && (isNotExcluded || isMarketingSpecial);
+                    return hasValidEfficiency && (isNotExcluded || isMarketingSpecial);
                 });
                 // Ensure both special marketing categories are always included if present
                 ['total marketing & advertising', 'advertising & marketing fund', 'total 614000 marketing & advertising', '614000 marketing & advertising'].forEach(specialCat => {
                     const found = this.originalData.find(item => (item.Category || '').toLowerCase().trim() === specialCat);
-                    if (found && found['Marketing Spend Efficiency'] && !marketingEfficiencyCategories.some(item => (item.Category || '').toLowerCase().trim() === specialCat)) {
+                    const efficiency = (found && found['Marketing Spend Efficiency']) ? found['Marketing Spend Efficiency'].toLowerCase().trim() : '';
+                    if (found && validMarketingEfficiency.includes(efficiency) && !marketingEfficiencyCategories.some(item => (item.Category || '').toLowerCase().trim() === specialCat)) {
                         marketingEfficiencyCategories.push(found);
                     }
                 });
